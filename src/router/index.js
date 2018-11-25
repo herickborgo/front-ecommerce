@@ -10,16 +10,16 @@ let baseRoutes = [
   {
     path: '/',
     component: Layout,
+    meta: { authorization: true },
     beforeEnter: function (to, from, next) {
-      next()
-      // const serialized = localStorage.getItem('authorization')
-      //
-      // if (!serialized) {
-      //   localStorage.setItem('rollback-uri', to.fullPath)
-      //   next('/login')
-      // } else {
-      //   next()
-      // }
+      const serialized = localStorage.getItem('Authorization')
+
+      if (!serialized && to.meta.authorization) {
+        localStorage.setItem('rollback-uri', to.fullPath)
+        next('/login')
+      } else {
+        next()
+      }
     },
     children: []
   }

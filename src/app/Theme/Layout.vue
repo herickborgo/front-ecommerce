@@ -1,6 +1,6 @@
 <template lang="pug">
   #layout
-    v-toolbar
+    v-toolbar(v-if="showToolbar")
       v-toolbar-title VINTAGE
       v-spacer
       v-icon.black--text(large) account_circle
@@ -8,10 +8,17 @@
 </template>
 
 <script>
+import LoginService from '@/services/LoginService'
 export default {
+  data: () => ({
+    LoginService,
+    showToolbar: true
+  }),
   methods: {
     logout () {
-      localStorage.clear()
+      LoginService.logout()
+
+      this.goToLogin()
     },
     goToLogin () {
       location.reload()
@@ -19,6 +26,14 @@ export default {
         .$router
         .replace('/login')
     }
+  },
+  watch: {
+    '$theme.toolbar': {
+      handler (value) {
+        this.showToolbar = value.visible
+      }
+    },
+    deep: true
   }
 }
 </script>
