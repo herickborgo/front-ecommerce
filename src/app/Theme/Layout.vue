@@ -20,19 +20,10 @@ export default {
       this.goToLogin()
     },
     goToLogin () {
-      this.$theme.toolbar.visible = false
       return this
         .$router
         .push('/login')
     }
-  },
-  watch: {
-    '$theme.toolbar': {
-      handler (value) {
-        this.showToolbar = value.visible
-      }
-    },
-    deep: true
   }
 }
 </script>

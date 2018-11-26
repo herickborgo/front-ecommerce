@@ -13,23 +13,20 @@ const config = {
 
 const axiosInstance = axios.create(config)
 
-const redirectToLogin = (response) => {
-  if (response.status === 401) {
-    localStorage.removeItem('Authorization')
-    return this
-      .$router
-      .replace('/login')
-  }
-  return response
-}
-
 // ---------- //
 
-// axiosInstance.interceptors.request.use(
-//   response => redirectToLogin(response)
-// );
 axiosInstance.interceptors.response.use(
-  error => redirectToLogin(error)
+  response => response,
+  (error) => {
+    const { response } = error
+    if (response.status === 401) {
+      localStorage.removeItem('Authorization')
+      return this
+        .$router
+        .replace('/login')
+    }
+    return Promise.reject(error)
+  }
 );
 
 Plugin.install = (VueInstance) => {
