@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import './plugins/vuetify'
 import './plugins/axios'
+import './plugins/vue-weetalert-2'
 import App from './App'
 import router from './router'
 import Vuetify from 'vuetify'

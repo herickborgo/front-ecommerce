@@ -1,30 +1,44 @@
-# front-ecommerce
+## Getting Started
 
-> A Vue.js project
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-## Build Setup
+### Prerequisites
 
-``` bash
-# install dependencies
-npm install
+What things you need to install the software and how to install them
 
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-
-# run unit tests
-npm run unit
-
-# run e2e tests
-npm run e2e
-
-# run all tests
-npm test
+```
+Docker and docker-compose or node
 ```
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+### Installing
+
+Step by step docker
+
+```
+docker-compose run node sh
+```
+
+```
+npm install
+```
+
+Exit the container
+
+```
+docker-compose up -d
+```
+
+Step by step node
+
+```
+npm install
+```
+```
+npm run serve
+```
+
+## Credencials
+
+```
+email: developer@devsquad.com
+password: devsquad

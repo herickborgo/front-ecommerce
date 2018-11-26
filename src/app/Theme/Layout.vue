@@ -4,7 +4,7 @@
       v-toolbar-title VINTAGE
       v-spacer
       v-icon.black--text(large) account_circle
-      v-btn(flat @click="logout()") Sign Out | Sign In
+      v-btn(flat @click="logout()") Sign Out
 </template>
 
 <script>
@@ -17,14 +17,13 @@ export default {
   methods: {
     logout () {
       LoginService.logout()
-
       this.goToLogin()
     },
     goToLogin () {
-      location.reload()
+      this.$theme.toolbar.visible = false
       return this
         .$router
-        .replace('/login')
+        .push('/login')
     }
   },
   watch: {

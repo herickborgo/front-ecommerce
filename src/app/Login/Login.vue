@@ -57,17 +57,18 @@ export default {
           LoginService.setToken(token)
           this
             .$router
-            .replace(rollbackUri || '/')
+            .replace(rollbackUri || '/products')
         }, ({ response }) => {
-          console.log('asd')
-          const { data } = response
-          const keys = Object.keys(data.errors)
-          keys.forEach((key) => {
-            data.errors[key].forEach((error) => {
-              this.errorText = error
+          if (response) {
+            const { data } = response
+            const keys = Object.keys(data.errors)
+            keys.forEach((key) => {
+              data.errors[key].forEach((error) => {
+                this.errorText = error
+              })
             })
-          })
-          this.error = true
+            this.error = true
+          }
         })
     }
   }
