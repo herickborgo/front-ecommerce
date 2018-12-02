@@ -1,69 +1,61 @@
 <template lang="pug">
   card-default
-    v-toolbar.elevation-1.py-2(color="grey lighten-4")
+    v-toolbar.elevation-1(color="grey lighten-4")
       v-toolbar-title Products
       v-spacer
     v-card-text
-      v-card-title
-        .title
-          v-flex(xs12 md3)
-            v-btn(
-              color="primary"
-              slot="activator"
-              @click="goToForm()"
-              ) Add Product
-          v-flex(xs12 sm6)
-            lazy-text-field(:search-term.sync="searchTerm")
-      v-data-table.elevation-2.mt-1.table-nowrap(
-        no-data-text="No records found"
-        no-results-text="No results found"
+      .title
+        v-flex(xs12 md3)
+          v-btn.ml-0(
+            color="primary"
+            slot="activator"
+            @click="goToForm()"
+            ) Add Product
+        v-flex(xs12 sm6)
+          lazy-text-field(:search-term.sync="pagination.search")
+      data-table(
         :headers="headers"
         :items="items"
-        hide-actions
-        :pagination.sync="pagination"
+        :page="pagination.page"
+        :pages="pages"
         :loading="loading"
+        @update-pagination="setPage($event)"
         )
-        template(slot="items" slot-scope="props")
-          tr
-            td.text-xs-left {{ props.item.name }}
-            td.text-xs-left {{ props.item.category_name }}
-            td.text-xs-left ${{ props.item.price }}
-            td.text-xs-left.cursor-pointer
-              v-tooltip(top)
-                v-btn.ma-0(
-                  icon
-                  flat
-                  dark
-                  color="grey darken-3"
-                  small
-                  slot="activator"
-                  @click="editRow(props.item.id)"
-                  )
-                  v-icon.grey--text.text--darken-2 edit
-                span Edit
-              v-tooltip(top)
-                v-btn(
-                  icon
-                  flat
-                  dark
-                  color="grey darken-3"
-                  small
-                  slot="activator"
-                  @click="deleteRow(props.item.id)"
-                  )
-                  v-icon.grey--text.text--darken-2 delete
-                span Delete
-    .text-xs-center.py-3
-      v-pagination(
-        v-model="currentPage"
-        :length="pages"
-        )
+        template(slot="table-rows" slot-scope="items")
+          td.text-xs-left {{ items.item.name }}
+          td.text-xs-left {{ items.item.category_name }}
+          td.text-xs-left ${{ items.item.price }}
+          td.text-xs-left.cursor-pointer
+            v-tooltip(top)
+              v-btn.ma-0(
+                icon
+                flat
+                dark
+                color="grey darken-3"
+                small
+                slot="activator"
+                @click="editRow(items.item.id)"
+                )
+                v-icon.grey--text.text--darken-2 edit
+              span Edit
+            v-tooltip(top)
+              v-btn(
+                icon
+                flat
+                dark
+                color="grey darken-3"
+                small
+                slot="activator"
+                @click="deleteRow(items.item.id)"
+                )
+                v-icon.grey--text.text--darken-2 delete
+              span Delete
 </template>
 
 <script>
 import CardDefault from '@/app/Arch/components/CardDefault'
-import FileUpload from '@/app/Arch/FileUpload'
 import LazyTextField from '@/app/Arch/components/LazyTextField'
+import DataTable from '@/app/Arch/components/DataTable'
 import ProductService from '@/services/ProductService'
 import notification from '@/mixins/notification'
 
@@ -72,19 +64,12 @@ export default {
   components: {
     CardDefault,
     LazyTextField,
-    FileUpload
+    DataTable
   },
   mixins: [
     notification
   ],
   data: () => ({
-    currentPage: 1,
-    searchTerm: '',
-    pagination: {
-      rowsPerPage: 10,
-      totalItems: null
-    },
-    metadata: {},
     items: [],
     headers: [
       { text: 'Name', value: 'name', align: 'left', width: '20%', sortable: false },
@@ -93,38 +78,41 @@ export default {
       { text: 'Actions', value: 'actions', align: 'left', width: '20%', sortable: false }
     ],
     uri: 'products',
-    uriImage: 'http://localhost:8081/products',
-    loading: true
-  }),
-  computed: {
-    pages () {
-      let { rowsPerPage, totalItems } = this.pagination
-      if (rowsPerPage == null || totalItems == null) {
-        return 0
-      }
-      return Math.ceil(totalItems / rowsPerPage)
+    loading: true,
+    pages: 1,
+    pagination: {
+      page: 1,
+      search: '',
+      perPage: 10
     }
-  },
-  mounted () {
+  }),
+  created () {
     this.getProducts()
   },
   methods: {
-    getProducts (page, search) {
+    getProducts () {
+      const { search, page, perPage } = this.pagination
+      const params = {
+        page,
+        per_page: perPage,
+        search
+      }
       ProductService
         .facade()
-        .index(page, search)
+        .index(params)
         .then(({ data }) => {
           this.items = data.data
-          this.currentPage = data.current_page
-          this.pagination.totalItems = data.total
+          this.pages = data.last_page
           this.loading = false
         })
-      // console.log(this.items)
+    },
+    setPage (event) {
+      this.pagination.page = event
     },
     editRow (id) {
       this
         .$router
-        .push(`${this.uri}/edit/${id}`)
+        .replace(`${this.uri}/edit/${id}`)
     },
     deleteRow (id) {
       const options = {
@@ -157,29 +145,13 @@ export default {
     goToForm () {
       this
         .$router
-        .push(`${this.uri}/new`)
-    },
-    returnPhoto (image) {
-      if (image) {
-        return `${this.uriImage}/${image}`
-      }
-      return ''
+        .replace(`${this.uri}/new`)
     }
   },
   watch: {
-    currentPage: {
-      handler (value) {
-        this.getProducts(value)
-      }
-    },
-    searchTerm: {
-      handler (value) {
-        this.getProducts(this.currentPage, value)
-      }
-    },
-    items: {
-      handler (value) {
-        console.log(value)
+    pagination: {
+      handler () {
+        this.getProducts()
       },
       deep: true
     }

@@ -4,12 +4,12 @@ export default class ProductService extends BaseService {
   constructor () {
     super('/backoffice')
   }
-  index (currentPage = 1, search = '') {
+  index (params) {
     const uri = this.getUrl('products')
 
     return this
       .$axios
-      .get(`${uri}?page=${currentPage}&per_page=10&search=${search}`)
+      .get(uri, { params })
   }
 
   show (id) {
@@ -22,6 +22,7 @@ export default class ProductService extends BaseService {
 
   store (payload) {
     const uri = this.getUrl('products')
+
     return this
       .$axios
       .post(uri, payload)

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import axios from 'axios'
+import LoginService from '@/services/LoginService'
 
 const token = localStorage.getItem('Authorization')
 
@@ -20,10 +21,7 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const { response } = error
     if (response.status === 401) {
-      localStorage.removeItem('Authorization')
-      return this
-        .$router
-        .replace('/login')
+      console.log(response.status)
     }
     return Promise.reject(error)
   }

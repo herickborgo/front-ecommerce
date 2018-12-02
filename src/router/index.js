@@ -10,9 +10,11 @@ let baseRoutes = [
   {
     path: '/',
     component: Layout,
+    redirect: '/products',
     meta: { authorization: true },
     beforeEnter: function (to, from, next) {
       const serialized = localStorage.getItem('Authorization')
+      console.log(to.meta.authorization)
 
       if (!serialized && to.meta.authorization) {
         localStorage.setItem('rollback-uri', to.fullPath)
