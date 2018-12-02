@@ -11,7 +11,7 @@
       :accept="typeAccept"
       :multiple="multiple"
       :disabled="disabled"
-      @change="onFileChange"
+      @change="onFileChange($event)"
     )
 </template>
 
@@ -70,20 +70,13 @@ export default{
       const reader = new FileReader()
 
       reader.onload = progress => {
-        if (self.multiple) {
-          self
-            .model
-            .push(reader.result)
-        } else {
-          self.model = reader.result
-        }
-        self.$emit('update:model', self.model)
+        self.model = reader.result
+        self.$emit('update-file', self.model)
       }
 
       reader.readAsDataURL(this.files[key])
     },
     onFileChange ($event) {
-      console.log($event)
       const self = this
 
       const files = this.files = $event.target.files || $event.dataTransfer.files

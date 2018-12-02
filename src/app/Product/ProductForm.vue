@@ -23,13 +23,22 @@
               v-for="(image, key) in product.images"
               :key="key"
               )
-              v-avatar(:size="200")
+              v-card(
+                raised
+                max-width="200px"
+                max-height="200px"
+                )
                 v-img(
                   name="image"
                   id="image"
-                  :src="image"
+                  :src="image.image_url"
+                  height="150px"
                 )
-          v-layout(column align-center justify-center v-if="!imagesExists")
+                v-card-actions
+                  v-spacer
+                  v-btn(flat @click="removeImage(key)")
+                    v-icon delete
+          v-layout(column align-center justify-center)
             v-flex.mt-2(xs12)
               file-upload(
                 name="image"
@@ -39,6 +48,7 @@
                 :buttonIcon="'add_a_photo'"
                 :multiple="true"
                 :isBase64="true"
+                @update-file="setProductImages($event)"
                 )
           v-layout.mt-2(row)
             v-flex(xs12)
@@ -64,22 +74,11 @@
                 required
                 )
             v-flex(xs12 sm6)
-              .v-input.v-text-field.v-input--is-label-active.v-input--is-dirty.theme--light.primary--text
-                .v-input__control
-                  .v-input__slot
-                    .v-text-field__slot
-                      label.v-label.v-label--active.theme--light.label_input Price
-                      money(
-                        v-model="product.price"
-                        v-bind="money"
-                        tabindex="0"
-                        aria-label="Price"
-                        type="text"
-                      )
-                  .v-text-field__details
-                    .v-messages.theme--light
-                      .v-messages__wrapper
-                        .v-messages__message
+              currency-input(
+                :field="product.price"
+                label="Price"
+                @set-currency="setProductPrice($event)"
+                )
           v-layout(row)
             v-flex(xs12)
               v-textarea(
@@ -107,36 +106,28 @@ import FileUpload from '@/app/Arch/FileUpload'
 import ProductService from '@/services/ProductService'
 import CategoryService from '@/services/CategoryService'
 import miniToastr from 'mini-toastr'
-import { Money } from 'v-money'
+import CurrencyInput from '@/app/Arch/components/CurrencyInput'
 
 export default {
   name: 'product-form',
   components: {
     CardDefault,
     FileUpload,
-    Money
+    CurrencyInput
   },
   data: () => ({
     title: 'New product',
     id: null,
     product: {
-      images: []
+      images: [],
+      price: 0
     },
     inputRules: [
       (v) => !!v || 'Filling in this field is required.'
     ],
     formValid: false,
     categories: [],
-    uriImage: 'http://localhost:8081/',
-    money: {
-      decimal: ',',
-      thousands: '.',
-      prefix: '$ ',
-      suffix: '',
-      precision: 2,
-      masked: false
-    },
-    imagesExists: false
+    uriImage: 'http://localhost:8081/'
   }),
   computed: {
     verifyIdExist () {
@@ -148,10 +139,6 @@ export default {
         .form
         .validate()
     }
-    // insertImage () {
-    //   const { images } = this.product
-    //   return images.length === 0
-    // }
   },
   created () {
     const { id: idParams } = this.$route.params
@@ -179,33 +166,43 @@ export default {
         .show(this.id)
         .then(({ data }) => {
           const { images } = data
-          if (images.length > 0) {
-            this.imagesExists = true
-          }
           let imagesProduct = []
           this.product = data
 
           images.map((productImage) => {
-            const { path } = productImage.image
-            imagesProduct.push(`${this.uriImage}${path}`)
+            const { image } = productImage
+            imagesProduct.push(image)
           })
-          this.product.images = imagesProduct
+          this
+            .product
+            .images = imagesProduct
           this.title = `Editar ${data.name}`
         })
+    },
+    setProductImages (event) {
+      this
+        .product
+        .images
+        .push({ image_url: event })
+    },
+    setProductPrice (event) {
+      this
+        .product
+        .price = event
+    },
+    removeImage (index) {
+      this
+        .product
+        .images
+        .splice(index, 1)
     },
     save () {
       if (!this.isValidForm) {
         return
       }
 
-      if (this.verifyIdExist) {
-        if (this.imagesExists) {
-          this.product.images = []
-        }
-        return this.update()
-      }
-
-      return this.store()
+      const { verifyIdExist } = this
+      return verifyIdExist ? this.update() : this.store()
     },
     store () {
       ProductService
@@ -213,6 +210,9 @@ export default {
         .store(this.product)
         .then(({ body }) => {
           this.successfullRequest('Product created successfully')
+          this
+            .$router
+            .replace('/products')
         }, () => {
           if (!this.product.images) {
             return miniToastr.error('Required image', 'Error!!')
@@ -226,6 +226,9 @@ export default {
         .update(this.id, this.product)
         .then(({ body }) => {
           this.successfullRequest('Product successfully edited')
+          this
+            .$router
+            .replace('/products')
         })
         .catch((response) => {
           miniToastr.error('Required fields', 'Error!!')
@@ -233,7 +236,6 @@ export default {
     },
     successfullRequest (message) {
       miniToastr.success(message, 'Success!')
-      this.goToBack()
     },
     goToBack () {
       this
