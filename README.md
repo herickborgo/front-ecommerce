@@ -42,3 +42,13 @@ npm run serve
 ```
 email: developer@devsquad.com
 password: devsquad
+```
+
+
+## CSV Sample Product Upload
+
+```
+"product_name";"price";"description";"category_name"
+"Example Product Name";200;"Example Description";"Example Category Name"
+...
+```
