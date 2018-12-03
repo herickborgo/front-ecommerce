@@ -47,7 +47,6 @@
                 :buttonTitle="'Add image'"
                 :buttonIcon="'add_a_photo'"
                 :multiple="true"
-                :isBase64="true"
                 @update-file="setProductImages($event)"
                 )
           v-layout.mt-2(row)
@@ -62,7 +61,7 @@
                 )
           v-layout(row wrap)
             v-flex(xs12 sm6)
-              v-select(
+              v-autocomplete(
                 name="category_id"
                 label="Categories"
                 id="category_id"
@@ -72,6 +71,7 @@
                 :rules="inputRules"
                 v-model="product.category_id"
                 required
+                autocomplete
                 )
             v-flex(xs12 sm6)
               currency-input(
@@ -85,8 +85,8 @@
                 name="description"
                 label="Description"
                 id="description"
-                :rules="inputRules"
                 v-model="product.description"
+                :rules="inputRules"
                 required
                 )
         v-layout.mt-5(row)
@@ -105,8 +105,8 @@ import CardDefault from '@/app/Arch/components/CardDefault'
 import FileUpload from '@/app/Arch/FileUpload'
 import ProductService from '@/services/ProductService'
 import CategoryService from '@/services/CategoryService'
-import miniToastr from 'mini-toastr'
 import CurrencyInput from '@/app/Arch/components/CurrencyInput'
+import notification from '@/mixins/notification'
 
 export default {
   name: 'product-form',
@@ -115,12 +115,17 @@ export default {
     FileUpload,
     CurrencyInput
   },
+  mixins: [
+    notification
+  ],
   data: () => ({
     title: 'New product',
     id: null,
     product: {
       images: [],
-      price: 0
+      price: 0,
+      description: '',
+      name: ''
     },
     inputRules: [
       (v) => !!v || 'Filling in this field is required.'
@@ -141,15 +146,14 @@ export default {
     }
   },
   created () {
-    const { id: idParams } = this.$route.params
-    this.id = idParams
+    const { id } = this.$route.params
+    this.id = id
 
     if (this.id) {
       this.getProductId()
     }
 
     this.getCategories()
-    miniToastr.init()
   },
   methods: {
     getCategories () {
@@ -209,15 +213,13 @@ export default {
         .facade()
         .store(this.product)
         .then(({ body }) => {
-          this.successfullRequest('Product created successfully')
-          this
+          this.messageSuccess('Product created successfully')
+          return this
             .$router
             .replace('/products')
-        }, () => {
-          if (!this.product.images) {
-            return miniToastr.error('Required image', 'Error!!')
-          }
-          miniToastr.error('error', 'Error!!')
+        }, ({ response }) => {
+          const { data } = response
+          this.messageBodyErrors(data.errors)
         })
     },
     update () {
@@ -225,22 +227,19 @@ export default {
         .facade()
         .update(this.id, this.product)
         .then(({ body }) => {
-          this.successfullRequest('Product successfully edited')
-          this
+          this.messageSuccess('Product successfully edited')
+          return this
             .$router
             .replace('/products')
+        }, ({ response }) => {
+          const { data } = response
+          this.messageBodyErrors(data.errors)
         })
-        .catch((response) => {
-          miniToastr.error('Required fields', 'Error!!')
-        })
-    },
-    successfullRequest (message) {
-      miniToastr.success(message, 'Success!')
     },
     goToBack () {
       this
         .$router
-        .back()
+        .replace('/products')
     }
   }
 }

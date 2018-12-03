@@ -5,12 +5,17 @@
       v-spacer
     v-card-text
       .title
-        v-flex(xs12 md3)
+        v-flex(xs12 md6)
           v-btn.ml-0(
             color="primary"
             slot="activator"
             @click="goToForm()"
             ) Add Product
+          v-btn.ml-0(
+            color="primary"
+            slot="activator"
+            @click="importProduct()"
+            ) Import Product
         v-flex(xs12 sm6)
           lazy-text-field(:search-term.sync="pagination.search")
       data-table(
@@ -50,6 +55,11 @@
                 )
                 v-icon.grey--text.text--darken-2 delete
               span Delete
+    CSVDialog(
+      :modal="modal"
+      @set-modal="setModal($event)"
+      @upload-csv="uploadCSV($event)"
+      )
 </template>
 
 <script>
@@ -58,13 +68,15 @@ import LazyTextField from '@/app/Arch/components/LazyTextField'
 import DataTable from '@/app/Arch/components/DataTable'
 import ProductService from '@/services/ProductService'
 import notification from '@/mixins/notification'
+import CSVDialog from '@/app/CSV/CSVDialog'
 
 export default {
   name: 'product-list',
   components: {
     CardDefault,
     LazyTextField,
-    DataTable
+    DataTable,
+    CSVDialog
   },
   mixins: [
     notification
@@ -84,7 +96,8 @@ export default {
       page: 1,
       search: '',
       perPage: 10
-    }
+    },
+    modal: false,
   }),
   created () {
     this.getProducts()
@@ -146,6 +159,25 @@ export default {
       this
         .$router
         .replace(`${this.uri}/new`)
+    },
+    importProduct () {
+      this.modal = true
+    },
+    setModal (event) {
+      this.modal = event
+    },
+    uploadCSV (event) {
+      ProductService
+        .facade()
+        .uploadCSV(event)
+        .then(() => {
+          this.modal = false
+          this.messageSuccess('Product successfully imported')
+          window.location.refresh()
+        }, ({ response }) => {
+          const { data } = response
+          this.messageBodyErrors(data.errors)
+        })
     }
   },
   watch: {

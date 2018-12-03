@@ -43,4 +43,20 @@ export default class ProductService extends BaseService {
       .$axios
       .delete(`${uri}/${id}`)
   }
+
+  uploadCSV(file) {
+    const url = this.getUrl('products/upload-csv');
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+
+    const formData = new FormData();
+    formData.append('csv', file, file.name);
+
+    return this
+      .$axios
+      .post(url, formData, config);
+  }
 }

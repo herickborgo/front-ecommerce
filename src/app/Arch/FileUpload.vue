@@ -5,6 +5,7 @@
       @click.native="onFocus"
       color="primary"
       ) {{ buttonTitle }}
+      v-icon.ml-3 {{ buttonIcon }}
     input(
       type="file"
       ref="fileInput"
@@ -47,6 +48,10 @@ export default{
     typeAccept: {
       type: String,
       default: 'image/x-png,image/jpeg'
+    },
+    buttonIcon: {
+      type: String,
+      default: 'cloud_upload'
     }
   },
   data: () => ({
@@ -104,7 +109,7 @@ export default{
       }
       this.files = files
       this.filename = this.getNameOrFilesName(files)
-      this.$emit('update:model', this.multiple ? files : files[0])
+      this.$emit('update-file', this.multiple ? files : files[0])
     },
     getNameOrFilesName (files) {
       let fileOrFilesName = ''
