@@ -59,6 +59,7 @@
       :modal="modal"
       @set-modal="setModal($event)"
       @upload-csv="uploadCSV($event)"
+      @sync-csv="synchronizeCSV()"
       )
 </template>
 
@@ -98,6 +99,7 @@ export default {
       perPage: 10
     },
     modal: false,
+    token: localStorage.getItem('Authorization')
   }),
   created () {
     this.getProducts()
@@ -173,6 +175,19 @@ export default {
         .then(() => {
           this.modal = false
           this.messageSuccess('Product successfully imported')
+          window.location.refresh()
+        }, ({ response }) => {
+          const { data } = response
+          this.messageBodyErrors(data.errors)
+        })
+    },
+    synchronizeCSV () {
+      ProductService
+        .facade()
+        .synchronizeCSV()
+        .then(() => {
+          this.modal = false
+          this.messageSuccess('Products successfully synced')
           window.location.refresh()
         }, ({ response }) => {
           const { data } = response

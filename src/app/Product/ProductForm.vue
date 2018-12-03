@@ -132,7 +132,8 @@ export default {
     ],
     formValid: false,
     categories: [],
-    uriImage: 'http://localhost:8081/'
+    uriImage: 'http://localhost:8081/',
+    token: localStorage.getItem('Authorization')
   }),
   computed: {
     verifyIdExist () {
@@ -149,7 +150,7 @@ export default {
     const { id } = this.$route.params
     this.id = id
 
-    if (this.id) {
+    if (this.id && this.token) {
       this.getProductId()
     }
 

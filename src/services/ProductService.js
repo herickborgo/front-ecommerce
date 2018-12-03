@@ -44,19 +44,27 @@ export default class ProductService extends BaseService {
       .delete(`${uri}/${id}`)
   }
 
-  uploadCSV(file) {
-    const url = this.getUrl('products/upload-csv');
+  uploadCSV (file) {
+    const url = this.getUrl('products/upload-csv')
     const config = {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    };
+        'Content-Type': 'multipart/form-data'
+      }
+    }
 
-    const formData = new FormData();
-    formData.append('csv', file, file.name);
+    const formData = new FormData()
+    formData.append('csv', file, file.name)
 
     return this
       .$axios
-      .post(url, formData, config);
+      .post(url, formData, config)
+  }
+
+  synchronizeCSV () {
+    const uri = this.getUrl('products/sync')
+
+    return this
+      .$axios
+      .get(uri)
   }
 }

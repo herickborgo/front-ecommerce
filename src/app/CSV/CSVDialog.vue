@@ -22,12 +22,21 @@
               v-flex(xs12)
                 h2.grey--text {{ file.name }}
         v-card-actions
-          v-container(fluid)
-            v-layout(row align-center justify-center fill-height)
+          v-container(grid-list-md)
+            v-layout(row wrap align-center justify-center fill-height)
               v-flex(xs6)
-                v-btn.mr-2(@click="dialog = false") Cancel
+                v-btn(@click="dialog = false") Cancel
               v-flex(xs6)
-                v-btn.mr-2.primary(@click="upload()") Upload
+                v-btn.primary(@click="upload()") Upload
+            v-layout(row wrap align-center justify-center fill-height)
+              v-flex(xs12)
+                v-btn(
+                  dark
+                  small
+                  block
+                  color="primary"
+                  @click="sync()"
+                ) Sync
 </template>
 
 <script>
@@ -63,6 +72,9 @@ export default {
     upload () {
       this.$emit('upload-csv', this.file)
       this.file = {}
+    },
+    sync () {
+      this.$emit('sync-csv')
     }
   }
 }

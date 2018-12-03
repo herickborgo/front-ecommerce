@@ -21,7 +21,7 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const { response } = error
     if (response.status === 401) {
-      console.log(response.status)
+      window.location.replace('/#/login')
     }
     return Promise.reject(error)
   }
